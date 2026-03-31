@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import AdmZip from "adm-zip";
 
-const MAX_ZIP_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_ZIP_SIZE_BYTES_MB = 5;
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
@@ -12,28 +12,27 @@ const BASE_DELAY_MS = 1000;
  * @param {Config} config
  */
 export default async function upsertSkills(config) {
-  const core = config.core;
+  const { core } = config;
 
   const zip = new AdmZip();
   addDirectoryToZip(zip, ".", ".");
   const zipBuffer = zip.toBuffer();
 
-  if (zipBuffer.length > MAX_ZIP_SIZE_BYTES) {
+  if (zipBuffer.length > MAX_ZIP_SIZE_BYTES_MB * 1024 * 1024) {
     throw new Error(
-      `ZIP is ${(zipBuffer.length / 1024 / 1024).toFixed(1)} MB, exceeding the 5 MB limit.`,
+      `ZIP is ${(zipBuffer.length / 1024 / 1024).toFixed(1)} MB, exceeding the ${MAX_ZIP_SIZE_BYTES_MB} MB limit.`,
     );
   }
 
   core.info(`Uploading ${(zipBuffer.length / 1024).toFixed(0)} KB ZIP.`);
 
   const { apiUrl, workspaceId, apiKey } = config.inputs;
-  const url = `${apiUrl}/api/v1/w/${workspaceId}/skills`;
 
   const blob = new Blob([zipBuffer], { type: "application/zip" });
   const form = new FormData();
   form.append("files", blob, "skills.zip");
 
-  const data = await fetchWithRetry(url, {
+  const data = await fetchWithRetry(`${apiUrl}/api/v1/w/${workspaceId}/skills`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
     body: form,
