@@ -21,3 +21,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Run action
+        uses: ./
+        with:
+          method: upsert-skills
+          workspace-id: ${{ secrets.DUST_WORKSPACE_ID }}
+          api-key: ${{ secrets.DUST_API_KEY }}
+          region: ${{ secrets.DUST_REGION }}
