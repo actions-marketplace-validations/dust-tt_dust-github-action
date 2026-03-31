@@ -1,0 +1,54 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - published
+      - edited
+
+jobs:
+  build:
+    name: Build and tag a new version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout the release tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit dist/ to the release tag
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add --force dist/
+          git commit -m "Build dist/ for ${TAG}"
+
+          # Update the release tag to include dist/.
+          git tag -f "${TAG}"
+          git push --force origin "refs/tags/${TAG}"
+
+          # Move the major version tag (e.g. v1) to the same commit.
+          MAJOR=$(echo "${TAG}" | grep -oE '^v[0-9]+')
+          if [ -n "$MAJOR" ]; then
+            git tag -f "${MAJOR}"
+            git push --force origin "refs/tags/${MAJOR}"
+          fi
