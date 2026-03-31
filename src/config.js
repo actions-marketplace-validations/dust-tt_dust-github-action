@@ -30,9 +30,7 @@ export default class Config {
 
     const region = core.getInput("region", { required: true }).toUpperCase();
     if (region !== "EU" && region !== "US") {
-      throw new Error(
-        `Invalid region "${region}". Must be "EU" or "US".`,
-      );
+      throw new Error(`Invalid region "${region}". Must be "EU" or "US".`);
     }
 
     this.inputs = {

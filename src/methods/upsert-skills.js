@@ -32,11 +32,15 @@ export default async function upsertSkills(config) {
   const form = new FormData();
   form.append("files", blob, "skills.zip");
 
-  const data = await fetchWithRetry(`${apiUrl}/api/v1/w/${workspaceId}/skills`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: form,
-  }, core);
+  const data = await fetchWithRetry(
+    `${apiUrl}/api/v1/w/${workspaceId}/skills`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: form,
+    },
+    core,
+  );
 
   core.setOutput("json", JSON.stringify(data));
   core.setOutput("imported", data.imported?.length ?? 0);
@@ -106,11 +110,15 @@ async function fetchWithRetry(url, options, core) {
 
     if (attempt < MAX_RETRIES) {
       const delayMs = BASE_DELAY_MS * 2 ** attempt;
-      core.info(`Request failed (${response.status}), retrying in ${delayMs}ms...`);
+      core.info(
+        `Request failed (${response.status}), retrying in ${delayMs}ms...`,
+      );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } else {
       const body = await response.text();
-      throw new Error(`API error (${response.status}) after ${MAX_RETRIES} retries: ${body}`);
+      throw new Error(
+        `API error (${response.status}) after ${MAX_RETRIES} retries: ${body}`,
+      );
     }
   }
 }
