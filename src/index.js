@@ -11,7 +11,7 @@ try {
       break;
     default:
       throw new Error(
-        `Unknown method "${config.inputs.method}". Supported: upsert-skills`,
+        `Unknown method "${config.inputs.method}". Supported: upsert-skills`
       );
   }
 } catch (error) {
