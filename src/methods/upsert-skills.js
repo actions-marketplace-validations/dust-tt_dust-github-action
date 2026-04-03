@@ -21,7 +21,7 @@ export default async function upsertSkills(config) {
 
   if (zipBuffer.length > MAX_ZIP_SIZE_MB * 1024 * 1024) {
     throw new Error(
-      `ZIP is ${(zipBuffer.length / 1024 / 1024).toFixed(1)} MB, exceeding the ${MAX_ZIP_SIZE_MB} MB limit.`,
+      `ZIP is ${(zipBuffer.length / 1024 / 1024).toFixed(1)} MB, exceeding the ${MAX_ZIP_SIZE_MB} MB limit.`
     );
   }
 
@@ -40,7 +40,7 @@ export default async function upsertSkills(config) {
       headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
     },
-    core,
+    core
   );
 
   core.setOutput("json", JSON.stringify(data));
@@ -52,7 +52,7 @@ export default async function upsertSkills(config) {
   const erroredCount = data.errored?.length ?? 0;
 
   core.notice(
-    `Synced skills: imported ${importedCount}, updated ${updatedCount}, errored ${erroredCount}`,
+    `Synced skills: imported ${importedCount}, updated ${updatedCount}, errored ${erroredCount}`
   );
 
   for (const skill of data.imported ?? []) {
@@ -112,13 +112,13 @@ async function fetchWithRetry(url, options, core) {
     if (attempt < MAX_RETRIES) {
       const delayMs = BASE_DELAY_MS * 2 ** attempt;
       core.info(
-        `Request failed (${response.status}), retrying in ${delayMs}ms...`,
+        `Request failed (${response.status}), retrying in ${delayMs}ms...`
       );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } else {
       const body = await response.text();
       throw new Error(
-        `API error (${response.status}) after ${MAX_RETRIES} retries: ${body}`,
+        `API error (${response.status}) after ${MAX_RETRIES} retries: ${body}`
       );
     }
   }
